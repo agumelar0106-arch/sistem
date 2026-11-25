@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050a18">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="System">
+<title>SYSTEM — Workout Quest</title>
+<style>
+:root{--bg:#050a18;--panel:#0b1630cc;--line:#2f7bff;--glow:#4aa3ff;--text:#d6e6ff;--dim:#7f9bc7;--ok:#5dffb0;--warn:#ff5d6c;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#10265a 0%,var(--bg) 60%) fixed;color:var(--text);font-family:"Rajdhani","Segoe UI",system-ui,sans-serif;font-size:17px;min-height:100vh}
+.wrap{max-width:560px;margin:0 auto;padding:16px 14px 60px}
+.win{border:1px solid var(--line);background:var(--panel);box-shadow:0 0 18px #2f7bff55,inset 0 0 22px #2f7bff22;padding:16px;margin-bottom:16px;border-radius:4px}
+h1,h2{margin:0;font-weight:600;letter-spacing:.04em;text-shadow:0 0 10px var(--glow)}
+h1{font-size:1.5rem;text-align:center}
+h2{font-size:1.1rem;text-align:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #2f7bff66}
+.hero{text-align:center}
+.lvl{font-size:4.2rem;line-height:1;font-weight:700;color:#fff;text-shadow:0 0 22px var(--glow),0 0 4px #fff}
+.sub{color:var(--dim)}
+.bar{height:12px;border:1px solid var(--line);margin:10px 0 4px;background:#02060f;border-radius:2px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#1c5fe0,var(--glow));box-shadow:0 0 10px var(--glow);transition:width .5s}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:12px}
+.stats div{display:flex;justify-content:space-between;border-bottom:1px dashed #2f7bff44;padding:3px 0}
+.stats b{color:#fff}
+.q{padding:12px 0;border-bottom:1px solid #2f7bff33}
+.q:last-child{border-bottom:0}
+.qh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.qh b{font-size:1.1rem}
+.done .qh b{color:var(--ok);text-shadow:0 0 8px var(--ok)}
+.row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+button,input{font:inherit;color:var(--text)}
+button{background:#0d2250;border:1px solid var(--line);padding:8px 12px;border-radius:3px;cursor:pointer;min-height:40px}
+button:active{background:var(--line);color:#fff}
+button:focus-visible,input:focus-visible{outline:2px solid var(--glow);outline-offset:2px}
+input{background:#02060f;border:1px solid #2f7bff88;padding:8px;border-radius:3px;width:84px;min-height:40px}
+.go{background:var(--line);color:#fff}
+.bonus{text-align:center;margin-top:12px;color:var(--dim)}
+.bonus.on{color:var(--ok);text-shadow:0 0 8px var(--ok)}
+.tot{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tot div{border:1px solid #2f7bff55;padding:8px;text-align:center;border-radius:3px}
+.tot b{display:block;font-size:1.5rem;color:#fff}
+.log{list-style:none;padding:0;margin:0}
+.log li{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #2f7bff2a;gap:8px}
+.log small{color:var(--dim)}
+.x{min-height:32px;padding:2px 9px;border-color:#ff5d6c88}
+details summary{cursor:pointer;color:var(--dim);text-align:center}
+.set{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.diffs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dbtn.on{background:var(--line);color:#fff;box-shadow:0 0 12px var(--glow)}
+.dbtn small{display:block;font-size:.8rem;opacity:.8}.dbtn.miss{border-color:var(--warn);color:var(--warn)}
+select{font:inherit;color:var(--text);background:#02060f;border:1px solid #2f7bff88;padding:8px;border-radius:3px;min-height:40px}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 14px);transform:translate(-50%,-140%);background:#07122e;border:1px solid var(--glow);box-shadow:0 0 24px var(--glow);padding:12px 18px;transition:transform .35s;z-index:9;text-align:center;max-width:90vw}
+#toast.show{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="toast" role="status"></div>
+<div class="wrap">
+  <div id="clock" class="sub" style="text-align:center;margin-bottom:10px;font-size:1.05rem"></div>
+  <div class="win hero" id="status"></div>
+  <div class="win"><h2>[ TINGKAT KESULITAN ]</h2><div class="diffs" id="diffs"></div><div class="bonus" id="dinfo"></div></div>
+  <div class="win"><h2>[ QUEST HARIAN ]</h2><div id="quests"></div><div class="bonus" id="bonus"></div></div>
+  <div class="win"><h2>[ SHOLAT ]</h2><div class="set"><span>Tanggal</span><input type="date" id="pd" style="width:auto"></div><div class="bonus" id="pnext" style="margin:8px 0"></div><div class="diffs" id="prs" style="margin-top:10px"></div><div class="bonus" id="pinfo"></div><div class="sub" style="text-align:center;margin:12px 0 6px">Sholat sunnah (tanpa denda, EXP tambahan)</div><div class="diffs" id="sns"></div><div class="sub" style="text-align:center;font-size:.9rem;margin-top:6px">Begitu waktu sholat habis dan belum dicentang, EXP langsung dipotong. Hari tanpa sholat sama sekali: EXP latihan hari itu hangus.</div></div>
+  <div class="win"><h2>[ CATAT MANUAL ]</h2><div class="set"><span>Latihan</span><select id="mx"></select></div><div class="set" id="mcw" style="display:none"><span>Nama olahraga</span><input id="mc" style="width:150px" maxlength="30"></div><div class="set"><span>Beban (kg, opsional)</span><input type="number" id="mk" inputmode="decimal" min="0" step="any"></div><div class="set"><span>Jumlah</span><input type="number" id="ma" inputmode="decimal" min="0" step="any"></div><div class="set"><span>Tanggal</span><input type="date" id="md" style="width:auto"></div><div class="row" style="justify-content:center;margin-top:12px"><button class="go" id="madd">Catat</button></div></div>
+  <div class="win"><h2>[ TOTAL SEUMUR HIDUP ]</h2><div class="tot" id="totals"></div></div>
+  <div class="win"><h2>[ RIWAYAT ]</h2><ul class="log" id="log"></ul></div>
+  <div class="win">
+    <details><summary>Pengaturan quest &amp; data</summary>
+      <div id="settings"></div><div id="basebox"></div><p class="sub" style="text-align:center;font-size:.9rem">Bookmark halaman ini: Ctrl+D di komputer, atau menu browser lalu Tambah bookmark atau Tambah ke layar utama di HP.</p>
+      <div class="row" style="justify-content:center;margin-top:14px">
+        <button id="exp">Salin backup</button><button id="imp">Pulihkan backup</button>
+      </div>
+      <textarea id="box" rows="4" style="display:none;width:100%;margin-top:8px;background:#02060f;color:var(--text);border:1px solid var(--line)"></textarea>
+    </details>
+  </div>
+</div>
+<script>
+const EX=[
+ {id:"pushup",name:"Push-up",unit:"rep",def:100,exp:1,steps:[10,25],stat:"STR"},
+ {id:"situp",name:"Sit-up",unit:"rep",def:100,exp:1,steps:[10,25],stat:"VIT"},
+ {id:"squat",name:"Squat",unit:"rep",def:100,exp:1,steps:[10,25],stat:"AGI"},
+ {id:"run",name:"Lari",unit:"km",def:10,exp:10,steps:[1,2.5],stat:"STA"}
+];
+const DIFF={beginner:{n:"Beginner",m:1,b:50,t:{pushup:20,situp:20,squat:20,run:2}},intermediate:{n:"Intermediate",m:1.25,b:75,t:{pushup:50,situp:50,squat:50,run:5}},hard:{n:"Hard",m:1.5,b:100,t:{pushup:100,situp:100,squat:100,run:10}},expert:{n:"Expert",m:2,b:150,t:{pushup:200,situp:200,squat:200,run:15}}};
+const PR=["Subuh","Dzuhur","Ashar","Maghrib","Isya"];
+const XT=[["gym","Bench Press","rep",1.5],["gym","Incline Press","rep",1.5],["gym","Shoulder Press","rep",1.5],["gym","Barbell Squat","rep",1.5],["gym","Deadlift","rep",2],["gym","Leg Press","rep",1.5],["gym","Lat Pulldown","rep",1.5],["gym","Seated Row","rep",1.5],["gym","Bicep Curl","rep",1],["gym","Tricep Pushdown","rep",1],["gym","Leg Extension","rep",1],["gym","Leg Curl","rep",1],["kali","Pull-up","rep",2],["kali","Dips","rep",1.5],["kali","Burpee","rep",2],["kali","Lunges","rep",1],["kali","Crunch","rep",.5],["kali","Jumping Jack","rep",.5],["kali","Plank","menit",3],["kardio","Treadmill","menit",2],["kardio","Sepeda Statis","menit",2],["kardio","Elliptical","menit",2],["kardio","Rowing Machine","menit",2],["kardio","Lompat Tali","menit",2],["kardio","HIIT","menit",3],["kardio","Senam atau Zumba","menit",2],["kardio","Berenang","menit",2.5],["kardio","Bersepeda","km",3],["kardio","Jalan Kaki","km",5],["kardio","Hiking","menit",2],["olga","Futsal atau Sepak Bola","menit",2],["olga","Basket","menit",2],["olga","Badminton","menit",2],["olga","Voli","menit",2],["olga","Tenis","menit",2],["olga","Tenis Meja","menit",1.5],["olga","Bela Diri","menit",2.5],["olga","Tinju","menit",2.5],["olga","Panjat Tebing","menit",2.5],["lentur","Yoga","menit",1],["lentur","Pilates","menit",1],["lentur","Stretching","menit",.5]].map(([g,name,unit,exp])=>({id:name.toLowerCase().replace(/\W+/g,"-"),g,name,unit,exp}));
+const GL=[["gym","Gym (beban)"],["kali","Kalistenik"],["kardio","Kardio"],["olga","Olahraga lain"],["lentur","Fleksibilitas"]];
+const ALL=EX.concat(XT);
+const SN=[{n:"Dhuha",x:10},{n:"Tahajud",x:20},{n:"Rawatib",x:10},{n:"Witir",x:10}];
+const bits=n=>{let c=0;while(n){c+=n&1;n>>=1}return c};
+const KEY="system-workout-v1";
+let S={log:[],targets:{}};
+try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+S.log=S.log||[];S.targets=S.targets||{};S.bonus=S.bonus||null;S.base=S.base||{};S.lat=typeof S.lat==="number"?S.lat:-6.2383;S.lng=typeof S.lng==="number"?S.lng:106.9756;S.sn=S.sn||{};S.pr=S.pr||{};S.pen=typeof S.pen==="number"?S.pen:20;S.start=S.start||new Date().toLocaleDateString("sv");S.dd=S.dd||{};if(!S.autoMig){S.diff="auto";S.autoMig=1}S.diff=S.diff==="auto"||DIFF[S.diff]?S.diff:"auto";
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toLocaleDateString("sv");
+const rd=l=>l>=35?"expert":l>=20?"hard":l>=10?"intermediate":"beginner";
+const curD=()=>S.diff==="auto"?rd(calc().lv):S.diff;
+const dk=d=>S.dd[d]||curD();
+const tgt=(e,d)=>S.targets[e.id]||DIFF[dk(d||today())].t[e.id];
+const sumDay=(d,id)=>S.log.filter(l=>l.d===d&&l.ex===id).reduce((a,l)=>a+l.amt,0);
+const dayDone=d=>EX.every(e=>sumDay(d,e.id)>=tgt(e,d));
+const total=id=>S.log.filter(l=>l.ex===id).reduce((a,l)=>a+l.amt,0)+(S.base[id]||0);
+const need=l=>100+50*l;
+const PC={};
+const hm=d=>String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+function ptimes(k){
+  const ck=k+"|"+S.lat+"|"+S.lng;if(PC[ck])return PC[ck];
+  const dt=new Date(k+"T00:00:00"),R=Math.PI/180,sin=x=>Math.sin(x*R),cos=x=>Math.cos(x*R),tan=x=>Math.tan(x*R),acos=x=>Math.acos(Math.max(-1,Math.min(1,x)))/R,asin=x=>Math.asin(x)/R,at2=(y,x)=>Math.atan2(y,x)/R,fx=(a,b)=>{a-=b*Math.floor(a/b);return a<0?a+b:a};
+  let Y=dt.getFullYear(),M=dt.getMonth()+1;const D0=dt.getDate();if(M<=2){Y--;M+=12}
+  const A=Math.floor(Y/100),B=2-A+Math.floor(A/4),J=Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+D0+B-1524.5-S.lng/360;
+  const sp=t=>{const d=J+t-2451545,g=fx(357.529+0.98560028*d,360),q=fx(280.459+0.98564736*d,360),L=fx(q+1.915*sin(g)+0.02*sin(2*g),360),e=23.439-0.00000036*d,ra=fx(at2(cos(e)*sin(L),cos(L))/15,24);return{dec:asin(sin(e)*sin(L)),eq:q/15-ra}};
+  const mid=t=>fx(12-sp(t).eq,24);
+  const ang=(a,t,ccw)=>{const dec=sp(t).dec,h=acos((-sin(a)-sin(dec)*sin(S.lat))/(cos(dec)*cos(S.lat)))/15;return mid(t)+(ccw?-h:h)};
+  const asr=t=>{const dec=sp(t).dec,a=-Math.atan(1/(1+tan(Math.abs(S.lat-dec))))/R;return mid(t)+acos((-sin(a)-sin(dec)*sin(S.lat))/(cos(dec)*cos(S.lat)))/15};
+  const base=-dt.getTimezoneOffset()/60-S.lng/15,mk=(h,dl)=>{const x=new Date(dt);x.setMinutes(Math.round((h+base)*60+dl));return x};
+  const r={start:[mk(ang(20,5/24,1),2),mk(mid(.5),2),mk(asr(13/24),2),mk(ang(.833,18/24,0),2),mk(ang(18,18/24,0),2)]};
+  const sr=mk(ang(.833,6/24,1),-2);
+  r.end=[sr,r.start[2],r.start[3],r.start[4],new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()+1)];
+  return PC[ck]=r;
+}
+function missedList(){const t=today();if(t<=S.start)return[];const pt=ptimes(t),n=Date.now(),m=S.pr[t]||0,r=[];for(let i=0;i<5;i++)if(n>=pt.end[i]&&!(m>>i&1))r.push(i);return r}
+function snExp(){let t=0;for(const k in S.sn){if(vd(k))continue;SN.forEach((s,i)=>{if(S.sn[k]>>i&1)t+=s.x})}return t}
+function vd(d){return d>S.start&&d<today()&&bits(S.pr[d]||0)===0}
+function penalty(){let p=0,x=new Date(S.start+"T00:00:00"),t=today(),k=S.start;while(k<t){if(k>S.start)p+=(5-bits(S.pr[k]||0))*S.pen;x.setDate(x.getDate()+1);k=x.toLocaleDateString("sv")}return p+missedList().length*S.pen}
+function sync(d){const ok=dayDone(d);if(ok&&!S.bonus[d])S.bonus[d]=DIFF[dk(d)].b;else if(!ok&&S.bonus[d])delete S.bonus[d]}
+function calc(){
+  const days=Object.keys(S.bonus).filter(k=>!vd(k));
+  let xp=S.log.filter(l=>!vd(l.d)).reduce((a,l)=>a+l.exp,0)+days.reduce((a,k)=>a+S.bonus[k],0)+EX.reduce((a,e)=>a+(S.base[e.id]||0)*e.exp,0)+snExp()-penalty(),lv=1;
+  xp=Math.max(0,xp);
+  while(xp>=need(lv)){xp-=need(lv);lv++}
+  return{lv,xp,days};
+}
+const rank=l=>l>=75?"S":l>=50?"A":l>=35?"B":l>=20?"C":l>=10?"D":"E";
+function streak(days){
+  let n=0,d=new Date();
+  if(!days.includes(d.toLocaleDateString("sv")))d.setDate(d.getDate()-1);
+  while(days.includes(d.toLocaleDateString("sv"))){n++;d.setDate(d.getDate()-1)}
+  return n;
+}
+const fmt=n=>Number.isInteger(n)?n:n.toFixed(1);
+function toast(t){const e=$("toast");e.innerHTML=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),2600)}
+function add(id,amt,dt,kg,cn){
+  amt=parseFloat(amt);if(!(amt>0))return;
+  let e=ALL.find(x=>x.id===id);if(id==="custom"){cn=(cn||"").trim();if(!cn)return toast("Isi nama olahraga");e={id:"custom:"+cn.toLowerCase(),name:cn,unit:"menit",exp:2}}if(!e)return;const wm=kg>0?1+kg/100:1;const before=calc(),d=dt||today(),k0=dk(d),wasDone=dayDone(d);S.dd[d]=k0;
+  S.log.unshift({id:Date.now(),d,t:new Date().toLocaleTimeString("id",{hour:"2-digit",minute:"2-digit"}),ex:e.id,amt,kg:kg>0?kg:0,nm:e.name,u:e.unit,exp:Math.round(amt*e.exp*wm*DIFF[k0].m)});
+  sync(d);save();const after=calc();render();
+  if(after.lv>before.lv)toast("<b>LEVEL UP!</b><br>Level "+after.lv+" tercapai");
+  else if(!wasDone&&dayDone(d))toast("<b>QUEST SELESAI</b><br>Bonus +"+DIFF[k0].b+" EXP");
+  else toast("+"+fmt(amt)+" "+e.unit+" "+e.name+" · +"+Math.round(amt*e.exp*wm*DIFF[k0].m)+" EXP");
+}
+function render(){
+  const c=calc(),d=today(),req=need(c.lv);
+  const st={STR:10+Math.floor(total("pushup")/25),VIT:10+Math.floor(total("situp")/25),AGI:10+Math.floor(total("squat")/25),STA:10+Math.floor(total("run")*2)};
+  $("status").innerHTML='<h1>[ STATUS ]</h1><div class="sub" style="margin-top:10px">Pemain · Rank '+rank(c.lv)+'</div><div class="lvl">'+c.lv+'</div><div class="sub">LEVEL</div><div class="bar"><i style="width:'+(c.xp/req*100)+'%"></i></div><div class="sub">EXP '+c.xp+' / '+req+' · Streak '+streak(c.days)+' hari</div><div class="stats">'+Object.entries(st).map(([k,v])=>"<div><span>"+k+"</span><b>"+v+"</b></div>").join("")+"</div>";
+  $("quests").innerHTML=EX.map(e=>{
+    const n=sumDay(d,e.id),t=tgt(e,d),ok=n>=t;
+    return '<div class="q'+(ok?" done":"")+'"><div class="qh"><b>'+e.name+(ok?" ✔":"")+'</b><span>'+fmt(n)+" / "+t+" "+e.unit+'</span></div><div class="bar"><i style="width:'+Math.min(100,n/t*100)+'%"></i></div><div class="row">'+
+    e.steps.map(s=>'<button data-a="'+e.id+'" data-v="'+s+'">+'+s+"</button>").join("")+
+    '<input type="number" inputmode="decimal" min="0" step="any" placeholder="jumlah" id="in-'+e.id+'" aria-label="Jumlah '+e.name+'"><button class="go" data-c="'+e.id+'">Catat</button></div></div>';
+  }).join("");
+  const done=dayDone(d);
+  $("bonus").className="bonus"+(done?" on":"");
+  $("bonus").textContent=done?"Semua quest hari ini selesai. Bonus +"+DIFF[dk(d)].b+" EXP diterima.":"Selesaikan semua quest hari ini untuk bonus +"+DIFF[dk(d)].b+" EXP.";
+  $("diffs").innerHTML='<button class="dbtn'+(S.diff==="auto"?' on':'')+'" data-diff="auto" style="grid-column:1/-1">Auto (ikut rank)</button>'+Object.entries(DIFF).map(([k,v])=>'<button class="dbtn'+(S.diff===k?' on':'')+'" data-diff="'+k+'">'+v.n+'</button>').join("");
+  const _dt=(S.diff==="auto"?"Rank "+rank(c.lv)+" → ":"")+DIFF[dk(d)].n+" · ";
+  $("dinfo").textContent=_dt+"EXP x"+DIFF[dk(d)].m+" · Bonus harian +"+DIFF[dk(d)].b;
+  $("basebox").innerHTML="<div class='sub' style='margin-top:14px;text-align:center'>Total awal (latihan sebelum pakai aplikasi ini)</div>"+EX.map(e=>"<div class='set'><span>"+e.name+" ("+e.unit+")</span><input type='number' min='0' step='any' value='"+(S.base[e.id]||0)+"' data-b='"+e.id+"'></div>").join("");
+  $("basebox").innerHTML+="<div class='set'><span>Denda per sholat terlewat (EXP)</span><input type='number' min='0' step='any' value='"+S.pen+"' data-p='1'></div>";
+  $("basebox").innerHTML+="<div class='set'><span>Denda sholat dihitung mulai</span><input type='date' style='width:auto' value='"+S.start+"' data-st='1'></div>";
+  $("basebox").innerHTML+="<div class='set'><span>Lokasi (lat, lng)</span><span><input type='number' step='any' style='width:100px' value='"+S.lat+"' data-ll='lat'> <input type='number' step='any' style='width:100px' value='"+S.lng+"' data-ll='lng'></span></div><div class='row' style='justify-content:center;margin-top:8px'><button id='geo'>Pakai lokasi saya</button></div>";
+  const pdv=$("pd").value||d,pm=S.pr[pdv]||0,pt=ptimes(pdv),isT=pdv===d,now=Date.now();
+  $("prs").innerHTML=PR.map((n,i)=>'<button class="dbtn'+((pm>>i&1)?' on':((pdv<d&&pdv>S.start)||(isT&&pdv>S.start&&now>=pt.end[i]))?' miss':'')+'" data-pr="'+i+'">'+((pm>>i&1)?'✔ ':'')+n+'<br><small>'+hm(pt.start[i])+'</small></button>').join("");
+  $("pinfo").textContent=pdv+": "+bits(pm)+"/5 sholat · Total denda: "+penalty()+" EXP";
+  const sm=S.sn[pdv]||0;
+  $("sns").innerHTML=SN.map((s,i)=>'<button class="dbtn'+((sm>>i&1)?' on':'')+'" data-sn="'+i+'">'+((sm>>i&1)?'✔ ':'')+s.n+' +'+s.x+'</button>').join("");
+  const xs={};S.log.forEach(l=>{if(!EX.some(e=>e.id===l.ex)&&!xs[l.ex]){const f=ALL.find(x=>x.id===l.ex)||{name:l.nm,unit:l.u};xs[l.ex]={id:l.ex,name:f.name,unit:f.unit}}});
+  $("totals").innerHTML=EX.concat(Object.values(xs)).map(e=>"<div><span class='sub'>"+e.name+"</span><b>"+fmt(total(e.id))+"</b><span class='sub'>"+e.unit+"</span></div>").join("");
+  $("log").innerHTML=S.log.length?S.log.slice().sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:b.id-a.id).slice(0,25).map(l=>{const e=ALL.find(x=>x.id===l.ex)||{name:l.nm,unit:l.u};return "<li><span>"+fmt(l.amt)+" "+e.unit+" "+e.name+(l.kg?" @"+l.kg+" kg":"")+"<br><small>"+l.d+" "+l.t+" · +"+(vd(l.d)?"0 EXP (hangus, tidak sholat)":l.exp+" EXP")+"</small></span><button class='x' data-del='"+l.id+"' aria-label='Hapus'>✕</button></li>"}).join(""):"<li class='sub'>Belum ada latihan. Catat set pertamamu di quest harian.</li>";
+  $("settings").innerHTML=EX.map(e=>"<div class='set'><span>Target "+e.name+" ("+e.unit+"/hari)</span><input type='number' min='1' value='"+tgt(e)+"' data-t='"+e.id+"'></div>").join("");
+}
+document.addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  if(b.dataset.sn!==undefined){const k=$("pd").value||today(),i=+b.dataset.sn;if(k>today())return;S.sn[k]=(S.sn[k]||0)^(1<<i);save();render();toast((S.sn[k]>>i&1?"+":"-")+SN[i].x+" EXP sunnah: "+SN[i].n)}
+  else if(b.dataset.pr!==undefined){const k=$("pd").value||today();if(k>today())return;const i=+b.dataset.pr;if(k===today()&&!(S.pr[k]>>i&1)&&Date.now()<ptimes(k).start[i])return toast("Belum masuk waktu "+PR[i]+" ("+hm(ptimes(k).start[i])+")");S.pr[k]=(S.pr[k]||0)^(1<<i);save();render()}
+  else if(b.dataset.diff){S.diff=b.dataset.diff;S.targets={};delete S.dd[today()];sync(today());save();render();toast("Tingkat: "+(S.diff==="auto"?"Auto":DIFF[S.diff].n))}
+  else if(b.id==="geo"){navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{S.lat=+p.coords.latitude.toFixed(4);S.lng=+p.coords.longitude.toFixed(4);save();render();toast("Lokasi diperbarui")},()=>toast("Lokasi tidak bisa diakses, isi manual")):toast("Browser tidak mendukung lokasi")}
+  else if(b.id==="madd"){const dt=$("md").value||today();if(dt>today())return toast("Tanggal tidak boleh di masa depan");add($("mx").value,$("ma").value,dt,parseFloat($("mk").value),$("mc").value);$("ma").value=""}
+  else if(b.dataset.a)add(b.dataset.a,b.dataset.v);
+  else if(b.dataset.c){const i=$("in-"+b.dataset.c);add(b.dataset.c,i.value)}
+  else if(b.dataset.del){const q=S.log.find(l=>String(l.id)===b.dataset.del);S.log=S.log.filter(l=>String(l.id)!==b.dataset.del);if(q)sync(q.d);save();render()}
+  else if(b.id==="exp"){const bx=$("box");bx.style.display="block";bx.value=JSON.stringify(S);bx.select();try{navigator.clipboard.writeText(bx.value);toast("Backup disalin")}catch(e){toast("Salin teks di kotak secara manual")}}
+  else if(b.id==="imp"){const bx=$("box");if(bx.style.display==="none"||!bx.value){bx.style.display="block";bx.value="";bx.placeholder="Tempel backup di sini, lalu tekan Pulihkan backup lagi";return}
+    try{const o=JSON.parse(bx.value);if(!Array.isArray(o.log))throw 0;S=o;S.targets=S.targets||{};S.base=S.base||{};S.lat=typeof S.lat==="number"?S.lat:-6.2383;S.lng=typeof S.lng==="number"?S.lng:106.9756;S.sn=S.sn||{};S.pr=S.pr||{};S.pen=typeof S.pen==="number"?S.pen:20;S.start=S.start||today();S.dd=S.dd||{};S.diff=o.diff==="auto"||DIFF[o.diff]?o.diff:"auto";if(!S.bonus){S.bonus={};[...new Set(S.log.map(l=>l.d))].forEach(sync)}save();render();bx.value="";bx.style.display="none";toast("Data dipulihkan")}catch(e){toast("Backup tidak valid")}}
+});
+document.addEventListener("change",ev=>{
+  if(ev.target.dataset.st){if(ev.target.value){S.start=ev.target.value;save();render();toast("Denda dihitung mulai "+S.start)}return}
+  if(ev.target.id==="mx"){const v=ev.target.value,x=ALL.find(z=>z.id===v);$("mcw").style.display=v==="custom"?"flex":"none";$("ma").placeholder=x?x.unit:"menit";return}
+  if(ev.target.dataset.ll){const v=parseFloat(ev.target.value);if(!isNaN(v)){S[ev.target.dataset.ll]=v;save();render()}return}
+  if(ev.target.id==="pd"){render();return}
+  if(ev.target.dataset.p){const v=parseFloat(ev.target.value);S.pen=v>=0?v:20;save();render();return}
+  if(ev.target.dataset.b){const v=parseFloat(ev.target.value);S.base[ev.target.dataset.b]=v>0?v:0;save();render();toast("Total awal disimpan");return}
+  const t=ev.target.dataset.t;if(!t)return;
+  const v=parseFloat(ev.target.value);if(v>0){S.targets[t]=v;save();render()}
+});
+document.addEventListener("keydown",ev=>{
+  if(ev.key==="Enter"&&ev.target.id&&ev.target.id.startsWith("in-")){const id=ev.target.id.slice(3);add(id,ev.target.value)}
+});
+if(!S.bonus){S.bonus={};[...new Set(S.log.map(l=>l.d))].forEach(sync);save()}
+const op=e=>'<option value="'+e.id+'">'+e.name+' ('+e.unit+')</option>';$("mx").innerHTML='<optgroup label="Quest harian">'+EX.map(op).join("")+'</optgroup>'+GL.map(([g,l])=>'<optgroup label="'+l+'">'+XT.filter(x=>x.g===g).map(op).join("")+'</optgroup>').join("")+'<option value="custom">Lainnya (ketik nama)</option>';$("ma").placeholder="rep";$("md").max=today();$("md").value=today();$("pd").max=today();$("pd").value=today();
+let lastDay=today();
+function checkDay(){const t=today();if(t!==lastDay){lastDay=t;$("md").max=t;$("md").value=t;$("pd").max=t;$("pd").value=t;render();toast("<b>HARI BARU</b><br>Quest harian direset")}}
+setInterval(checkDay,30000);document.addEventListener("visibilitychange",checkDay);window.addEventListener("focus",checkDay);
+let lastML={d:today(),l:missedList()};
+function tick(){
+  const n=new Date();$("clock").textContent=n.toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" - "+hm(n)+":"+String(n.getSeconds()).padStart(2,"0");
+  checkDay();
+  const t=today(),ml=missedList();
+  if(lastML.d===t){const nw=ml.filter(i=>!lastML.l.includes(i));if(nw.length){render();toast("<b>Waktu "+nw.map(i=>PR[i]).join(", ")+" habis</b><br>EXP -"+nw.length*S.pen)}}
+  lastML={d:t,l:ml};
+  const pt=ptimes(t),now=n.getTime(),cur=[0,1,2,3,4].find(i=>now>=pt.start[i]&&now<pt.end[i]),nx=[0,1,2,3,4].find(i=>now<pt.start[i]);
+  let nm,at;if(nx!==undefined){nm=PR[nx];at=pt.start[nx]}else{nm="Subuh";at=ptimes(new Date(n.getFullYear(),n.getMonth(),n.getDate()+1).toLocaleDateString("sv")).start[0]}
+  const mm=Math.max(0,Math.round((at-n)/60000)),cd=Math.floor(mm/60)+"j "+mm%60+"m";
+  $("pnext").textContent=(cur!==undefined?"Sekarang waktu "+PR[cur]+" (habis "+hm(pt.end[cur])+"). ":"")+"Berikutnya: "+nm+" "+hm(at)+" ("+cd+" lagi)";
+}
+setInterval(tick,1000);tick();
+render();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}</script>
+</body>
+</html>
